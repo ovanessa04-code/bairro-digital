@@ -1,0 +1,613 @@
+<!DOCTYPE html>
+
+<html lang="pt-BR">
+
+<head>
+
+  <meta charset="UTF-8">
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>Bairro Digital - Mapa dos Bairros de Maringá</title>
+
+  
+
+  <!-- Estilos e Fontes -->
+
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+
+  <!-- Leaflet CSS -->
+
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+
+
+  <style>
+
+    * {
+
+      box-sizing: border-box;
+
+      margin: 0;
+
+      padding: 0;
+
+      font-family: 'Poppins', sans-serif;
+
+    }
+
+
+    body {
+
+      display: flex;
+
+      height: 100vh;
+
+      background-color: #f4f7f6;
+
+    }
+
+
+    /* Painel Lateral Esquerdo */
+
+    .sidebar {
+
+      width: 360px;
+
+      background: #ffffff;
+
+      padding: 24px;
+
+      box-shadow: 2px 0 10px rgba(0, 0, 0, 0.1);
+
+      display: flex;
+
+      flex-direction: column;
+
+      z-index: 1000;
+
+      overflow-y: auto;
+
+    }
+
+
+    /* Área da Logo */
+
+    .brand-container {
+
+      width: 100%;
+
+      margin-bottom: 20px;
+
+      text-align: center;
+
+    }
+
+
+    .brand-logo {
+
+      width: 100%;
+
+      max-width: 280px;
+
+      height: auto;
+
+      object-fit: contain;
+
+    }
+
+
+    .page-subtitle {
+
+      font-size: 24px;
+
+      font-weight: 700;
+
+      color: #38761D; /* Verde principal do Bairro Digital */
+
+      text-transform: uppercase;
+
+      margin-bottom: 2px;
+
+      letter-spacing: 0.5px;
+
+    }
+
+
+    .page-tagline {
+
+      font-size: 13px;
+
+      color: #275214;
+
+      font-weight: 600;
+
+      letter-spacing: 1px;
+
+      margin-bottom: 24px;
+
+      text-transform: uppercase;
+
+    }
+
+
+    /* Pesquisa */
+
+    .search-box {
+
+      margin-bottom: 20px;
+
+    }
+
+
+    .search-box input {
+
+      width: 100%;
+
+      padding: 12px;
+
+      border: 1.5px solid #dcdcdc;
+
+      border-radius: 8px;
+
+      font-size: 14px;
+
+      outline: none;
+
+      transition: border-color 0.2s, box-shadow 0.2s;
+
+    }
+
+
+    .search-box input:focus {
+
+      border-color: #38761D;
+
+      box-shadow: 0 0 0 3px rgba(56, 118, 29, 0.15);
+
+    }
+
+
+    /* Legendas interativas */
+
+    .filter-legend h4 {
+
+      font-size: 14px;
+
+      color: #275214;
+
+      margin-bottom: 12px;
+
+    }
+
+
+    .legend-item {
+
+      display: flex;
+
+      align-items: center;
+
+      gap: 12px;
+
+      font-size: 14px;
+
+      margin-bottom: 10px;
+
+      color: #333333;
+
+      cursor: pointer;
+
+      user-select: none;
+
+      padding: 6px 8px;
+
+      border-radius: 8px;
+
+      transition: background 0.2s;
+
+    }
+
+
+    .legend-item:hover {
+
+      background: #f0f7ef;
+
+    }
+
+
+    .legend-item.inactive {
+
+      opacity: 0.35;
+
+    }
+
+
+    /* Estilos dos Marcadores Personalizados no Mapa */
+
+    .custom-pin {
+
+      width: 32px;
+
+      height: 32px;
+
+      border-radius: 50%;
+
+      display: flex;
+
+      align-items: center;
+
+      justify-content: center;
+
+      color: white;
+
+      font-weight: bold;
+
+      font-size: 15px;
+
+      box-shadow: 0 3px 6px rgba(0,0,0,0.3);
+
+      border: 2px solid #ffffff;
+
+    }
+
+
+    /* Cores ajustadas para a paleta da marca */
+
+    .pin-yellow { background-color: #f39c12; }
+
+    .pin-red    { background-color: #d93829; }
+
+    .pin-blue   { background-color: #2980b9; }
+
+    .pin-green  { background-color: #38761D; } /* Verde Bairro Digital */
+
+    .pin-brown  { background-color: #795548; }
+
+
+    /* Contentor do Mapa */
+
+    .map-container {
+
+      flex: 1;
+
+      height: 100%;
+
+      position: relative;
+
+    }
+
+
+    #map {
+
+      width: 100%;
+
+      height: 100%;
+
+    }
+
+
+    /* Botão de Destaque / Ação (Seguindo o estilo da imagem) */
+
+    .btn-action {
+
+      background: linear-gradient(135deg, #38761D 0%, #275214 100%);
+
+      color: white;
+
+      border: none;
+
+      padding: 12px 16px;
+
+      border-radius: 20px;
+
+      font-weight: 600;
+
+      font-size: 14px;
+
+      cursor: pointer;
+
+      display: flex;
+
+      align-items: center;
+
+      justify-content: center;
+
+      gap: 8px;
+
+      margin-top: 15px;
+
+      transition: opacity 0.2s, transform 0.1s;
+
+    }
+
+
+    .btn-action:hover {
+
+      opacity: 0.92;
+
+    }
+
+
+    .btn-action:active {
+
+      transform: scale(0.98);
+
+    }
+
+  </style>
+
+</head>
+
+<body>
+
+
+  <!-- Sidebar com Logo e Legendas -->
+
+  <div class="sidebar">
+
+    <div class="brand-container">
+
+      <img src="logo.jpg" alt="Bairro Digital Logo" class="brand-logo">
+
+    </div>
+
+
+    <div class="page-subtitle">MARINGÁ - PR</div>
+
+    <div class="page-tagline">MAPA DOS BAIRROS</div>
+
+
+    <!-- Barra de Pesquisa -->
+
+    <div class="search-box">
+
+      <input type="text" id="searchInput" placeholder="Pesquisar bairro ou tipo de ocorrência...">
+
+    </div>
+
+
+    <!-- Legenda de Ocorrências (Filtros Clicáveis) -->
+
+    <div class="filter-legend">
+
+      <h4>Legenda de Ocorrências (Clique para filtrar)</h4>
+
+      <div class="legend-item" data-type="pin-yellow">
+
+        <div class="custom-pin pin-yellow" style="width: 26px; height: 26px; font-size: 12px;">⚠️</div>
+
+        <span>Manutenção / Obras / Buracos</span>
+
+      </div>
+
+      <div class="legend-item" data-type="pin-red">
+
+        <div class="custom-pin pin-red" style="width: 26px; height: 26px; font-size: 12px;">🚗</div>
+
+        <span>Trânsito / Bloqueio</span>
+
+      </div>
+
+      <div class="legend-item" data-type="pin-blue">
+
+        <div class="custom-pin pin-blue" style="width: 26px; height: 26px; font-size: 12px;">💧</div>
+
+        <span>Saneamento / Lazer</span>
+
+      </div>
+
+      <div class="legend-item" data-type="pin-green">
+
+        <div class="custom-pin pin-green" style="width: 26px; height: 26px; font-size: 12px;">🌱</div>
+
+        <span>Meio Ambiente / Parques</span>
+
+      </div>
+
+      <div class="legend-item" data-type="pin-brown">
+
+        <div class="custom-pin pin-brown" style="width: 26px; height: 26px; font-size: 12px;">➕</div>
+
+        <span>Postos de Saúde / Serviços</span>
+
+      </div>
+
+    </div>
+
+
+    <!-- Botão de Ação Estilizado em Verde -->
+
+    <button class="btn-action">
+
+      <span>+ Nova ocorrência</span>
+
+    </button>
+
+  </div>
+
+
+  <!-- Contentor do Mapa -->
+
+  <div class="map-container">
+
+    <div id="map"></div>
+
+  </div>
+
+
+  <!-- Leaflet JS -->
+
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+
+  <script>
+
+    const latMaringa = -23.420999;
+
+    const lngMaringa = -51.933056;
+
+    
+
+    const map = L.map('map').setView([latMaringa, lngMaringa], 13);
+
+
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+
+      maxZoom: 19,
+
+      attribution: '© OpenStreetMap'
+
+    }).addTo(map);
+
+
+    function createCustomIcon(className, iconSymbol) {
+
+      return L.divIcon({
+
+        className: '',
+
+        html: `<div class="custom-pin ${className}">${iconSymbol}</div>`,
+
+        iconSize: [32, 32],
+
+        iconAnchor: [16, 16],
+
+        popupAnchor: [0, -16]
+
+      });
+
+    }
+
+
+    const ocorrencias = [
+
+      { lat: -23.415, lng: -51.928, title: "Zona 05", desc: "Manutenção na rede elétrica", type: "pin-yellow", icon: "⚠️" },
+
+      { lat: -23.398, lng: -51.905, title: "Jd. Panamá", desc: "Obra de recapeamento asfáltico", type: "pin-yellow", icon: "⚠️" },
+
+      { lat: -23.390, lng: -51.912, title: "Pioneiro Esperança", desc: "Reparo de buraco na pista", type: "pin-yellow", icon: "⚠️" },
+
+      { lat: -23.438, lng: -51.915, title: "Vila Mandaguari", desc: "Manutenção de canalização", type: "pin-yellow", icon: "⚠️" },
+
+
+      { lat: -23.410, lng: -51.942, title: "Zona 08", desc: "Trânsito lento - Horário de pico", type: "pin-red", icon: "🚗" },
+
+      { lat: -23.392, lng: -51.950, title: "São Judas", desc: "Semáforo em manutenção", type: "pin-red", icon: "🚗" },
+
+      { lat: -23.400, lng: -51.900, title: "Jd. Grevílleas", desc: "Bloqueio parcial da via", type: "pin-red", icon: "🚗" },
+
+
+      { lat: -23.408, lng: -51.918, title: "Zona 02 / Iritia", desc: "Vazamento de água reportado", type: "pin-blue", icon: "💧" },
+
+      { lat: -23.445, lng: -51.925, title: "Jardin Kentênça", desc: "Manutenção em parque infantil", type: "pin-blue", icon: "💧" },
+
+
+      { lat: -23.450, lng: -51.920, title: "Ecoville", desc: "Limpeza e roçada de terreno", type: "pin-green", icon: "🌱" },
+
+      { lat: -23.420, lng: -51.935, title: "Parque Ingá", desc: "Preservação de área verde", type: "pin-green", icon: "🌱" },
+
+
+      { lat: -23.425, lng: -51.960, title: "Distrito Industrial", desc: "Posto de Saúde da Região", type: "pin-brown", icon: "➕" },
+
+      { lat: -23.430, lng: -51.918, title: "Universitária", desc: "Atendimento Comunitário", type: "pin-brown", icon: "➕" }
+
+    ];
+
+
+    const markers = [];
+
+    const activeCategories = new Set(["pin-yellow", "pin-red", "pin-blue", "pin-green", "pin-brown"]);
+
+
+    ocorrencias.forEach(ponto => {
+
+      const customIcon = createCustomIcon(ponto.type, ponto.icon);
+
+      
+
+      const marker = L.marker([ponto.lat, ponto.lng], { icon: customIcon })
+
+        .addTo(map)
+
+        .bindPopup(`<b>${ponto.title}</b><br>${ponto.desc}`);
+
+
+      markers.push({ ...ponto, instance: marker });
+
+    });
+
+
+    function filterMarkers() {
+
+      const query = document.getElementById('searchInput').value.toLowerCase().trim();
+
+
+      markers.forEach(item => {
+
+        const matchesCategory = activeCategories.has(item.type);
+
+        const matchesQuery = item.title.toLowerCase().includes(query) || 
+
+                             item.desc.toLowerCase().includes(query);
+
+
+        if (matchesCategory && matchesQuery) {
+
+          if (!map.hasLayer(item.instance)) {
+
+            map.addLayer(item.instance);
+
+          }
+
+        } else {
+
+          if (map.hasLayer(item.instance)) {
+
+            map.removeLayer(item.instance);
+
+          }
+
+        }
+
+      });
+
+    }
+
+
+    document.getElementById('searchInput').addEventListener('input', filterMarkers);
+
+
+    document.querySelectorAll('.legend-item').forEach(item => {
+
+      item.addEventListener('click', () => {
+
+        const type = item.getAttribute('data-type');
+
+        
+
+        if (activeCategories.has(type)) {
+
+          activeCategories.delete(type);
+
+          item.classList.add('inactive');
+
+        } else {
+
+          activeCategories.add(type);
+
+          item.classList.remove('inactive');
+
+        }
+
+        
+
+        filterMarkers();
+
+      });
+
+    });
+
+  </script>
+
+</body>
+
+</html>
